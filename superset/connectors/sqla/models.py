@@ -796,9 +796,10 @@ class SqlaTable(
         target_col = cols[column_name]
         tp = self.get_template_processor()
         tbl, cte = self.get_from_clause(tp)
+        sqla_col = target_col.get_sqla_col(template_processor=tp)
 
         qry = (
-            select([target_col.get_sqla_col(template_processor=tp)])
+            select([sqla_col])
             .select_from(tbl)
             .distinct()
         )
@@ -814,7 +815,7 @@ class SqlaTable(
             sql = self.mutate_query_from_config(sql)
 
             df = pd.read_sql_query(sql=sql, con=engine)
-            return df[column_name].to_list()
+            return df[sqla_col.name].to_list()
 
     def mutate_query_from_config(self, sql: str) -> str:
         """Apply config's SQL_QUERY_MUTATOR
